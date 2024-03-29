@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] Rigidbody2D rb;
     [SerializeField] Camera cam;
+    [SerializeField] FieldOfView fieldOfView;
 
     float moveSpeed = 5f;
     Vector2 movement;
@@ -34,5 +35,7 @@ public class PlayerController : MonoBehaviour
         Vector2 lookDir = mousePosition - rb.position;
         float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg;
         rb.rotation = angle;
+        fieldOfView.SetAimDirection(lookDir);
+        fieldOfView.SetOrigin(transform.position);
     }
 }
