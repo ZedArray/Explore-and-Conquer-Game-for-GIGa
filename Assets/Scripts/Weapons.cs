@@ -17,7 +17,7 @@ public class Weapons : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetMouseButtonDown(0))
         {
             GameObject bullet = Instantiate(bulletPrefab, shotPoint.position, shotPoint.rotation);
             Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();

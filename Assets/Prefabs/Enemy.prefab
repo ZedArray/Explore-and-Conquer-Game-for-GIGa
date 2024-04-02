@@ -134,6 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 416f792cb6effe54d9e395b392b8f2ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fovPrefab: {fileID: 2450381422452140933, guid: 32214d6172ac7264fa31779dd836fd32, type: 3}
   points:
   - {fileID: 0}
   - {fileID: 0}
