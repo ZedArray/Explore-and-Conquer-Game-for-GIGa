@@ -73,4 +73,11 @@ public class EnemyController : MonoBehaviour
             Destroy(fieldOfView.gameObject);
         }
     }
+
+    public void killed()
+    {
+        Destroy(gameObject);
+        Destroy(fieldOfView.gameObject);
+    }
+
 }
