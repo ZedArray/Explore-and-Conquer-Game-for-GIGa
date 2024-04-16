@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
+    [SerializeField] Transform playerPosition;
     [SerializeField] FieldOfView fovPrefab;
     FieldOfView fieldOfView;
 
@@ -12,6 +13,7 @@ public class EnemyController : MonoBehaviour
     int current;
     public float speed;
     int targetDir;
+    float distanceFromPlayer;
 
     // Start is called before the first frame update
     void Start()
@@ -55,6 +57,7 @@ public class EnemyController : MonoBehaviour
                 current = (current + 1) % points.Length;
             }
         }
+        distanceFromPlayer = Vector3.Distance(playerPosition.position, transform.position);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -69,8 +72,7 @@ public class EnemyController : MonoBehaviour
     {
         if (col.gameObject.tag == "Bullet")
         {
-            Destroy(gameObject);
-            Destroy(fieldOfView.gameObject);
+            killed();
         }
     }
 
