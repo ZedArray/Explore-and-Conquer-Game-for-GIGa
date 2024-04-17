@@ -5,6 +5,8 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     [SerializeField] Transform playerPosition;
+    [SerializeField] Transform shotPoint;
+    [SerializeField] GameObject bulletPrefab;
     [SerializeField] FieldOfView fovPrefab;
     FieldOfView fieldOfView;
 
@@ -14,6 +16,8 @@ public class EnemyController : MonoBehaviour
     public float speed;
     int targetDir;
     float distanceFromPlayer;
+    float bulletSpeed = 10f;
+    float guntimer;
 
     // Start is called before the first frame update
     void Start()
@@ -22,11 +26,21 @@ public class EnemyController : MonoBehaviour
         transform.right = points[current + 1].position - points[current].position;
 
         fieldOfView = Instantiate(fovPrefab);
+
+        guntimer = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
+        guntimer += Time.deltaTime;
+
+        if (guntimer > 2)
+        {
+            shoot();
+            guntimer = 0;
+        }
+
         if (current + 1 == points.Length)
         {
             targetDir = 0;
@@ -74,6 +88,13 @@ public class EnemyController : MonoBehaviour
         {
             killed();
         }
+    }
+
+    private void shoot()
+    {
+        GameObject bullet = Instantiate(bulletPrefab, shotPoint.position, shotPoint.rotation);
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        rb.AddForce(shotPoint.right * bulletSpeed, ForceMode2D.Impulse);
     }
 
     public void killed()
