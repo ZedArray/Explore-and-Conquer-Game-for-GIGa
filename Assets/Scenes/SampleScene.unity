@@ -1367,7 +1367,7 @@ GameObject:
   - component: {fileID: 494817739}
   - component: {fileID: 494817741}
   - component: {fileID: 494817740}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: KnifeHB
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1627,7 +1627,7 @@ GameObject:
   - component: {fileID: 996681854}
   - component: {fileID: 996681858}
   - component: {fileID: 996681859}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -2050,14 +2050,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy (2)
       objectReference: {fileID: 0}
-    - target: {fileID: 8202002443016651699, guid: 75f5e01b317a0b141a3f0b753a5e3374, type: 3}
-      propertyPath: m_BodyType
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 8202002443016651699, guid: 75f5e01b317a0b141a3f0b753a5e3374, type: 3}
-      propertyPath: m_Constraints
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 8258436733057901687, guid: 75f5e01b317a0b141a3f0b753a5e3374, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -2147,7 +2139,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2000908253}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ShotPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2213,6 +2205,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy
       objectReference: {fileID: 0}
+    - target: {fileID: 6428262532495520919, guid: 75f5e01b317a0b141a3f0b753a5e3374, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7801084864357930851, guid: 75f5e01b317a0b141a3f0b753a5e3374, type: 3}
       propertyPath: m_UseDelaunayMesh
       value: 0
@@ -2220,14 +2216,6 @@ PrefabInstance:
     - target: {fileID: 7801084864357930851, guid: 75f5e01b317a0b141a3f0b753a5e3374, type: 3}
       propertyPath: m_UsedByComposite
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8202002443016651699, guid: 75f5e01b317a0b141a3f0b753a5e3374, type: 3}
-      propertyPath: m_BodyType
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 8202002443016651699, guid: 75f5e01b317a0b141a3f0b753a5e3374, type: 3}
-      propertyPath: m_GravityScale
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8258436733057901687, guid: 75f5e01b317a0b141a3f0b753a5e3374, type: 3}
       propertyPath: m_RootOrder

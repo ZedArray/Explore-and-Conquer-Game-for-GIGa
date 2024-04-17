@@ -182,6 +182,13 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   speed: 1
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 264
+  waitUntilTurn: 4
+  waitUntilMove: 10
+  FOV: 90
+  viewDistance: 5
 --- !u!50 &8202002443016651699
 Rigidbody2D:
   serializedVersion: 4

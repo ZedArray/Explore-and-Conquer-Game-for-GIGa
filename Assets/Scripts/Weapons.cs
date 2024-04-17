@@ -43,5 +43,9 @@ public class Weapons : MonoBehaviour
         {
             targ.killed();
         }
+        if (collision.CompareTag("Bullet") && isKnifing)
+        {
+            Destroy(collision.gameObject);
+        }
     }
 }
