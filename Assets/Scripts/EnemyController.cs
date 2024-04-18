@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
-    [SerializeField] Transform playerPosition;
+    [SerializeField] PlayerController player;
     [SerializeField] Transform shotPoint;
     [SerializeField] GameObject bulletPrefab;
     [SerializeField] FieldOfView fovPrefab;
     FieldOfView fieldOfView;
+    [SerializeField] SpriteRenderer spriteRenderer;
 
-    enum State
+    public enum State
     {
         Idle,
+        Seeing,
         Alert,
         Attacking
         //Idle = Basic State
@@ -28,9 +30,12 @@ public class EnemyController : MonoBehaviour
     float distanceFromPlayer;
     float bulletSpeed = 10f;
     float guntimer;
-    private State state;
+    public State state;
     float angle;
     Quaternion targetRotation;
+    int bulletCounter;
+    float alertTimer;
+    float alertWhen = 5;
 
     [SerializeField] LayerMask playerMask;
     [SerializeField] int waitUntilTurn;
@@ -50,6 +55,8 @@ public class EnemyController : MonoBehaviour
         state = State.Idle;
         fieldOfView.SetFOV(FOV);
         fieldOfView.SetViewDistance(viewDistance);
+        bulletCounter = 0;
+        alertTimer = 0;
     }
 
     // Update is called once per frame
@@ -62,6 +69,7 @@ public class EnemyController : MonoBehaviour
         switch (state)
         {
             case State.Idle:
+                //spriteRenderer.color = new Color(255, 255, 255);
                 if (current + 1 == points.Length)
                 {
                     targetDir = 0;
@@ -69,6 +77,15 @@ public class EnemyController : MonoBehaviour
                 else
                 {
                     targetDir = current + 1;
+                }
+
+                if (alertTimer > 0)
+                {
+                    alertTimer -= Time.deltaTime;
+                }
+                else if (alertTimer < 0)
+                {
+                    alertTimer = 0;
                 }
 
                 timer += Time.deltaTime;
@@ -91,59 +108,84 @@ public class EnemyController : MonoBehaviour
                     }
                 }
                 break;
+
+            case State.Seeing:
+                //spriteRenderer.color = new Color(255, 255, 0);
+                angle = Mathf.Atan2(player.transform.position.y - transform.position.y, player.transform.position.x - transform.position.x) * Mathf.Rad2Deg;
+                targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
+                transform.rotation = targetRotation;
+                if (player.getCrouched())
+                {
+                    alertTimer += Time.deltaTime;
+                }
+                else if (!player.getCrouched())
+                {
+                    alertTimer += Time.deltaTime * 3;
+                }
+                break;
+
             case State.Attacking:
-                angle = Mathf.Atan2(playerPosition.position.y - transform.position.y, playerPosition.position.x - transform.position.x) * Mathf.Rad2Deg;
+                //spriteRenderer.color = new Color(255, 0, 0);
+                angle = Mathf.Atan2(player.transform.position.y - transform.position.y, player.transform.position.x - transform.position.x) * Mathf.Rad2Deg;
                 targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
                 transform.rotation = targetRotation;
                 guntimer += Time.deltaTime;
-                if (guntimer > 2)
+                
+                if(bulletCounter < 3)
                 {
-                    shoot();
-                    guntimer = 0;
+                    if (guntimer > 0.2f)
+                    {
+                        shoot();
+                        guntimer = 0;
+                        bulletCounter++;
+                    }
+                }
+                else if (bulletCounter == 3){
+                    if (guntimer > 3f)
+                    {
+                        guntimer = 0;
+                        bulletCounter = 0;
+                    }
                 }
                 break;
         }
         
-        /*float angle = Mathf.Atan2(playerPosition.position.y - transform.position.y, playerPosition.position.x - transform.position.x) * Mathf.Rad2Deg;
+        /*float angle = Mathf.Atan2(player.position.y - transform.position.y, player.position.x - transform.position.x) * Mathf.Rad2Deg;
         var targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
         transform.rotation = targetRotation;*/
-        distanceFromPlayer = Vector3.Distance(playerPosition.position, transform.position);
+        distanceFromPlayer = Vector3.Distance(player.transform.position, transform.position);
     }
 
     private void detectCheck()
     {
         if (distanceFromPlayer < viewDistance)
         {
-            Vector3 dirToPlayer = (playerPosition.position - transform.position).normalized;
+            Vector3 dirToPlayer = (player.transform.position - transform.position).normalized;
             if(Vector3.Angle(transform.right, dirToPlayer) < FOV / 2f)
             {
                 RaycastHit2D _hit = Physics2D.Raycast(new Vector3(transform.position.x, transform.position.y, 0), dirToPlayer, viewDistance, playerMask);
                 Debug.DrawRay(new Vector3(transform.position.x, transform.position.y, 0), dirToPlayer);
-                if (_hit.collider != null)
+                Debug.Log(_hit.transform.gameObject.name);
+                if(_hit.transform.gameObject.name == "Player")
                 {
-                    Debug.Log(_hit.transform.gameObject.name);
-                    if(_hit.transform.gameObject.name == "Player")
+                    if (alertTimer > alertWhen)
                     {
                         state = State.Attacking;
                     }
                     else
                     {
-                        state = State.Idle;
+                        state = State.Seeing;
                     }
+                }
+                else
+                {
+                    state = State.Idle;
                 }
             }
         }
         else
         {
             state = State.Idle;
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Player"))
-        {
-            Debug.Log("aaaa");
         }
     }
 
@@ -168,4 +210,13 @@ public class EnemyController : MonoBehaviour
         Destroy(fieldOfView.gameObject);
     }
 
+    public float getAlertTimer()
+    {
+        return alertTimer;
+    }
+
+    public float getAlertWhen()
+    {
+        return alertWhen;
+    }
 }

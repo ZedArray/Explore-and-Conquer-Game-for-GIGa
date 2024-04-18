@@ -68,4 +68,9 @@ public class PlayerController : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    public bool getCrouched()
+    {
+        return isCrouching;
+    }
 }
