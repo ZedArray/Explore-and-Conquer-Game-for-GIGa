@@ -10,13 +10,15 @@ public class EnemyController : MonoBehaviour
     [SerializeField] FieldOfView fovPrefab;
     FieldOfView fieldOfView;
     [SerializeField] SpriteRenderer spriteRenderer;
+    [SerializeField] LayerMask playerMask;
 
     public enum State
     {
         Idle,
         Seeing,
         Alert,
-        Attacking
+        Attacking,
+        CoolingDown
         //Idle = Basic State
         //Alert = Shoot on sight
         //Attacking = Shooting
@@ -25,19 +27,20 @@ public class EnemyController : MonoBehaviour
     private float timer;
     public Transform[] points;
     int current;
-    public float speed;
     int targetDir;
     float distanceFromPlayer;
     float bulletSpeed = 10f;
     float guntimer;
-    public State state;
+    private State state;
     float angle;
     Quaternion targetRotation;
     int bulletCounter;
     float alertTimer;
     float alertWhen = 5;
 
-    [SerializeField] LayerMask playerMask;
+    bool wasAggroed;
+
+    [SerializeField] float speed;
     [SerializeField] int waitUntilTurn;
     [SerializeField] int waitUntilMove;
     [SerializeField] float FOV;
@@ -57,6 +60,7 @@ public class EnemyController : MonoBehaviour
         fieldOfView.SetViewDistance(viewDistance);
         bulletCounter = 0;
         alertTimer = 0;
+        wasAggroed = false;
     }
 
     // Update is called once per frame
@@ -70,6 +74,7 @@ public class EnemyController : MonoBehaviour
         {
             case State.Idle:
                 //spriteRenderer.color = new Color(255, 255, 255);
+                wasAggroed = false;
                 if (current + 1 == points.Length)
                 {
                     targetDir = 0;
@@ -111,9 +116,7 @@ public class EnemyController : MonoBehaviour
 
             case State.Seeing:
                 //spriteRenderer.color = new Color(255, 255, 0);
-                angle = Mathf.Atan2(player.transform.position.y - transform.position.y, player.transform.position.x - transform.position.x) * Mathf.Rad2Deg;
-                targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
-                transform.rotation = targetRotation;
+                aimAtPlayer();
                 if (player.getCrouched())
                 {
                     alertTimer += Time.deltaTime;
@@ -126,9 +129,8 @@ public class EnemyController : MonoBehaviour
 
             case State.Attacking:
                 //spriteRenderer.color = new Color(255, 0, 0);
-                angle = Mathf.Atan2(player.transform.position.y - transform.position.y, player.transform.position.x - transform.position.x) * Mathf.Rad2Deg;
-                targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
-                transform.rotation = targetRotation;
+                aimAtPlayer();
+                wasAggroed = true;
                 guntimer += Time.deltaTime;
                 
                 if(bulletCounter < 3)
@@ -147,6 +149,15 @@ public class EnemyController : MonoBehaviour
                         bulletCounter = 0;
                     }
                 }
+                alertTimer = alertWhen + 3;
+                break;
+
+            case State.Alert:
+                alertTimer -= Time.deltaTime;
+                break;
+
+            case State.CoolingDown:
+                alertTimer -= Time.deltaTime / 2;
                 break;
         }
         
@@ -154,6 +165,18 @@ public class EnemyController : MonoBehaviour
         var targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
         transform.rotation = targetRotation;*/
         distanceFromPlayer = Vector3.Distance(player.transform.position, transform.position);
+    }
+
+    public State getState()
+    {
+        return state;
+    }
+
+    private void aimAtPlayer()
+    {
+        angle = Mathf.Atan2(player.transform.position.y - transform.position.y, player.transform.position.x - transform.position.x) * Mathf.Rad2Deg;
+        targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
+        transform.rotation = targetRotation;
     }
 
     private void detectCheck()
@@ -179,13 +202,38 @@ public class EnemyController : MonoBehaviour
                 }
                 else
                 {
-                    state = State.Idle;
+                    if (wasAggroed)
+                    {
+                        state = State.CoolingDown;
+                    }
+                    else
+                    {
+                        state = State.Idle;
+                    }
                 }
             }
         }
         else
         {
-            state = State.Idle;
+            if (alertTimer >= alertWhen)
+            {
+                state = State.Alert;
+            }
+            else if (alertTimer < alertWhen && alertTimer > 0)
+            {
+                if(wasAggroed)
+                {
+                    state = State.CoolingDown;
+                }
+                else
+                {
+                    state = State.Idle;
+                }
+            }
+            else if (alertTimer <= 0)
+            {
+                state = State.Idle;
+            }
         }
     }
 

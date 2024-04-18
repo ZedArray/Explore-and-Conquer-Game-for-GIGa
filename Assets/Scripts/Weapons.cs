@@ -9,30 +9,49 @@ public class Weapons : MonoBehaviour
     [SerializeField] Collider2D knifeHitBox;
 
     bool isKnifing;
+    float knifeTimer;
+    float knifeCooldownTimer;
+    float knifeCooldown = 1;
 
     public float bulletSpeed = 40f;
     // Start is called before the first frame update
     void Start()
     {
         isKnifing = false;
+        knifeTimer = 0;
+        knifeCooldownTimer = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
+        knifeCooldownTimer += Time.deltaTime;
         if (Input.GetMouseButtonDown(0))
         {
             GameObject bullet = Instantiate(bulletPrefab, shotPoint.position, shotPoint.rotation);
             Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
             rb.AddForce(shotPoint.right * bulletSpeed, ForceMode2D.Impulse);
         }
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButton(1) && knifeCooldownTimer >= knifeCooldown)
         {
-            isKnifing = true;
+            if (knifeTimer > 0.2f)
+            {
+                isKnifing = false;
+            }
+            else
+            {
+                isKnifing = true;
+                knifeTimer += Time.deltaTime;
+            }
         }
         if (Input.GetMouseButtonUp(1))
         {
             isKnifing = false;
+            knifeTimer = 0;
+            if(knifeCooldownTimer >= knifeCooldown)
+            {
+                knifeCooldownTimer = 0;
+            }
         }
     }
 

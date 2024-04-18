@@ -25,17 +25,25 @@ public class AlertTimer : MonoBehaviour
         alertTimer = enemyController.getAlertTimer();
         fillAmount = 360 - (alertTimer / alertWhen * 360);
 
-        switch (enemyController.state)
+        switch (enemyController.getState())
         {
             case EnemyController.State.Seeing:
-                spriteRenderer.color = Color.yellow;
+                spriteRenderer.color = Color.white;
                 break;
 
             case EnemyController.State.Attacking:
                 spriteRenderer.color = Color.red;
                 break;
 
+            case EnemyController.State.Idle:
+                spriteRenderer.color = Color.white;
+                break;
+
             case EnemyController.State.Alert:
+                spriteRenderer.color = new Color32(255, 115, 0, 255);
+                break;
+
+            case EnemyController.State.CoolingDown:
                 spriteRenderer.color = Color.yellow;
                 break;
         }
