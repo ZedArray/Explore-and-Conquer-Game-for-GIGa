@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Rigidbody2D rb;
     [SerializeField] Camera cam;
     [SerializeField] SpriteRenderer sRend;
+    [SerializeField] Weapons weapons;
     /*[SerializeField] FieldOfView fieldOfView;*/
 
     [SerializeField] float moveSpeed;
@@ -17,6 +18,7 @@ public class PlayerController : MonoBehaviour
     Vector2 mousePosition;
 
     bool isCrouching;
+    bool isShooting;
 
     // Start is called before the first frame update
     void Start()
@@ -25,11 +27,13 @@ public class PlayerController : MonoBehaviour
         CrouchSpeed = moveSpeed / 2;
         OriginalMoveSpeed = moveSpeed;
         isCrouching = false;
+        isShooting = false;
     }
 
     // Update is called once per frame
     void Update()
     {
+        isShooting = weapons.getShooting();
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
 
@@ -63,10 +67,15 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Bullet")
+        /*if (collision.gameObject.tag == "Bullet")
         {
             Destroy(gameObject);
-        }
+        }*/
+    }
+
+    public bool getShooting()
+    {
+        return isShooting;
     }
 
     public bool getCrouched()

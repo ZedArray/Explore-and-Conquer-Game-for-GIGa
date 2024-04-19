@@ -19,9 +19,6 @@ public class EnemyController : MonoBehaviour
         Alert,
         Attacking,
         CoolingDown
-        //Idle = Basic State
-        //Alert = Shoot on sight
-        //Attacking = Shooting
     }
 
     private float timer;
@@ -29,7 +26,7 @@ public class EnemyController : MonoBehaviour
     int current;
     int targetDir;
     float distanceFromPlayer;
-    float bulletSpeed = 10f;
+    float bulletSpeed = 15f;
     float guntimer;
     private State state;
     float angle;
@@ -37,8 +34,11 @@ public class EnemyController : MonoBehaviour
     int bulletCounter;
     float alertTimer;
     float alertWhen = 5;
+    float alertFOV = 150f;
+    float originalFOV;
 
     bool wasAggroed;
+    bool playerShot;
 
     [SerializeField] float speed;
     [SerializeField] int waitUntilTurn;
@@ -56,19 +56,23 @@ public class EnemyController : MonoBehaviour
 
         guntimer = 0;
         state = State.Idle;
-        fieldOfView.SetFOV(FOV);
         fieldOfView.SetViewDistance(viewDistance);
         bulletCounter = 0;
         alertTimer = 0;
         wasAggroed = false;
+        originalFOV = FOV;
     }
 
     // Update is called once per frame
     void Update()
     {
+        fieldOfView.SetFOV(FOV);
         fieldOfView.SetOrigin(transform.position);
         fieldOfView.SetAimDirection(transform.right);
         detectCheck();
+        guntimer += Time.deltaTime;
+        playerShot = player.getShooting();
+        
 
         switch (state)
         {
@@ -120,10 +124,18 @@ public class EnemyController : MonoBehaviour
                 if (player.getCrouched())
                 {
                     alertTimer += Time.deltaTime;
+                    if (wasAggroed)
+                    {
+                        alertTimer += Time.deltaTime;
+                    }
                 }
                 else if (!player.getCrouched())
                 {
-                    alertTimer += Time.deltaTime * 3;
+                    alertTimer += Time.deltaTime * 2;
+                    if (wasAggroed)
+                    {
+                        alertTimer += Time.deltaTime * 2;
+                    }
                 }
                 break;
 
@@ -131,7 +143,6 @@ public class EnemyController : MonoBehaviour
                 //spriteRenderer.color = new Color(255, 0, 0);
                 aimAtPlayer();
                 wasAggroed = true;
-                guntimer += Time.deltaTime;
                 
                 if(bulletCounter < 3)
                 {
@@ -143,7 +154,7 @@ public class EnemyController : MonoBehaviour
                     }
                 }
                 else if (bulletCounter == 3){
-                    if (guntimer > 3f)
+                    if (guntimer > 2f)
                     {
                         guntimer = 0;
                         bulletCounter = 0;
@@ -154,9 +165,12 @@ public class EnemyController : MonoBehaviour
 
             case State.Alert:
                 alertTimer -= Time.deltaTime;
+                wasAggroed = true;
+                FOV = alertFOV;
                 break;
 
             case State.CoolingDown:
+                FOV = alertFOV;
                 alertTimer -= Time.deltaTime / 2;
                 break;
         }
@@ -165,6 +179,11 @@ public class EnemyController : MonoBehaviour
         var targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
         transform.rotation = targetRotation;*/
         distanceFromPlayer = Vector3.Distance(player.transform.position, transform.position);
+    }
+
+    public bool getAggro()
+    {
+        return wasAggroed;
     }
 
     public State getState()
@@ -181,14 +200,20 @@ public class EnemyController : MonoBehaviour
 
     private void detectCheck()
     {
-        if (distanceFromPlayer < viewDistance)
+        FOV = originalFOV;
+        if (playerShot && distanceFromPlayer < 7f)
+        {
+            alertTimer = alertWhen + 3f;
+            aimAtPlayer();
+        }
+        else if (distanceFromPlayer < viewDistance)
         {
             Vector3 dirToPlayer = (player.transform.position - transform.position).normalized;
             if(Vector3.Angle(transform.right, dirToPlayer) < FOV / 2f)
             {
                 RaycastHit2D _hit = Physics2D.Raycast(new Vector3(transform.position.x, transform.position.y, 0), dirToPlayer, viewDistance, playerMask);
-                Debug.DrawRay(new Vector3(transform.position.x, transform.position.y, 0), dirToPlayer);
-                Debug.Log(_hit.transform.gameObject.name);
+                //Debug.DrawRay(new Vector3(transform.position.x, transform.position.y, 0), dirToPlayer);
+                //Debug.Log(_hit.transform.gameObject.name);
                 if(_hit.transform.gameObject.name == "Player")
                 {
                     if (alertTimer > alertWhen)
@@ -202,7 +227,11 @@ public class EnemyController : MonoBehaviour
                 }
                 else
                 {
-                    if (wasAggroed)
+                    if (alertTimer >= alertWhen)
+                    {
+                        state = State.Alert;
+                    }
+                    else if (alertTimer < alertWhen && alertTimer > 0 && wasAggroed)
                     {
                         state = State.CoolingDown;
                     }

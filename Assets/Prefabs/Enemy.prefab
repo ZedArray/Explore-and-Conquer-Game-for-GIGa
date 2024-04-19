@@ -101,6 +101,7 @@ MonoBehaviour:
   enemyController: {fileID: 3543799425454970829}
   radFillMat: {fileID: 2100000, guid: d056aa6932bf04e439614d6ac4e7e069, type: 2}
   fillAmount: 0
+  yellowAmount: 0
 --- !u!1 &4005519205959701935
 GameObject:
   m_ObjectHideFlags: 0

@@ -36,7 +36,7 @@ Transform:
   - {fileID: 3950868891737578102}
   - {fileID: 1992135487857914955}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &6932440057958620509
 SpriteRenderer:
@@ -132,6 +132,7 @@ MonoBehaviour:
   rb: {fileID: 2843293204906400610}
   cam: {fileID: 0}
   sRend: {fileID: 6932440057958620509}
+  weapons: {fileID: 6508872599590163887}
   moveSpeed: 4
   OriginalMoveSpeed: 0
   CrouchSpeed: 0
@@ -185,7 +186,7 @@ MonoBehaviour:
   bulletPrefab: {fileID: 3035025342115948396, guid: 5627dc69046c6754fa50198026741bc1, type: 3}
   shotPoint: {fileID: 3950868891737578102}
   knifeHitBox: {fileID: 4234159350428602776}
-  bulletSpeed: 20
+  bulletSpeed: 30
 --- !u!1 &1133410305356228477
 GameObject:
   m_ObjectHideFlags: 0

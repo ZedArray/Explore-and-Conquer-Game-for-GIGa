@@ -11,6 +11,7 @@ public class AlertTimer : MonoBehaviour
     float alertTimer;
     float alertWhen;
     public float fillAmount;
+    public byte yellowAmount;
     // Start is called before the first frame update
     void Start()
     {
@@ -24,11 +25,19 @@ public class AlertTimer : MonoBehaviour
     {
         alertTimer = enemyController.getAlertTimer();
         fillAmount = 360 - (alertTimer / alertWhen * 360);
+        yellowAmount = (byte)(255 - (alertTimer / alertWhen * 255));
 
         switch (enemyController.getState())
         {
             case EnemyController.State.Seeing:
-                spriteRenderer.color = Color.white;
+                if (enemyController.getAggro())
+                {
+                    spriteRenderer.color = new Color32(255, 115, 0, 255);
+                }
+                else
+                {
+                    spriteRenderer.color = new Color32(255, 255, yellowAmount, 255);
+                }
                 break;
 
             case EnemyController.State.Attacking:
@@ -36,7 +45,7 @@ public class AlertTimer : MonoBehaviour
                 break;
 
             case EnemyController.State.Idle:
-                spriteRenderer.color = Color.white;
+                spriteRenderer.color = new Color32(255, 255, yellowAmount, 255);
                 break;
 
             case EnemyController.State.Alert:
@@ -44,7 +53,7 @@ public class AlertTimer : MonoBehaviour
                 break;
 
             case EnemyController.State.CoolingDown:
-                spriteRenderer.color = Color.yellow;
+                spriteRenderer.color = new Color32(255, 115, 0, 255);
                 break;
         }
 
