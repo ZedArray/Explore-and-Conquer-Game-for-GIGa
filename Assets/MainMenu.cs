@@ -2,12 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
+    [SerializeField] Toggle skiptutorial;
     public void OnNew()
     {
-        SceneManager.LoadScene(1);
+        if (!skiptutorial.isOn)
+        {
+            SceneManager.LoadScene(1);
+        }
+        else
+        {
+            SceneManager.LoadScene(2);
+        }
+        PlayerPrefs.SetInt("BulletAmount", 7);
+        PlayerPrefs.SetInt("BulletMax", 14);
     }
 
     public void OnLoad()

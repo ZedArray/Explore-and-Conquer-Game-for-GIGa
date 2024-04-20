@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-
+    [SerializeField] GameManager gm;
     [SerializeField] Rigidbody2D rb;
     [SerializeField] Camera cam;
     [SerializeField] SpriteRenderer sRend;
     [SerializeField] Weapons weapons;
+    [SerializeField] AudioSource deathSFX;
     /*[SerializeField] FieldOfView fieldOfView;*/
 
     [SerializeField] float moveSpeed;
@@ -19,6 +20,12 @@ public class PlayerController : MonoBehaviour
 
     bool isCrouching;
     bool isShooting;
+    [SerializeField] bool godmode;
+
+    private void Awake()
+    {
+        gm = (GameManager)FindObjectOfType(typeof(GameManager));
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -33,6 +40,11 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (gm.getIfPaused() || gm.getIsDead())
+        {
+            return;
+        }
+
         isShooting = weapons.getShooting();
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
@@ -67,10 +79,26 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        /*if (collision.gameObject.tag == "Bullet")
+        if (collision.gameObject.tag == "Bullet")
         {
+            killPlayer();
+        }
+    }
+
+    public void killPlayer()
+    {
+        if (!godmode)
+        {
+            Instantiate(deathSFX);
+            gm.gameOver();
             Destroy(gameObject);
-        }*/
+        }
+        
+    }
+
+    public void setgodmode(bool mode)
+    {
+        godmode = mode;
     }
 
     public bool getShooting()

@@ -5,15 +5,20 @@ using UnityEngine;
 public class CameraMovement : MonoBehaviour
 {
     [SerializeField] Transform target;
+    [SerializeField] GameManager gm;
     // Start is called before the first frame update
-    void Start()
-    {
 
+    private void Awake()
+    {
+        gm = (GameManager)FindObjectOfType(typeof(GameManager));
     }
 
     // Update is called once per frame
     void LateUpdate()
     {
-        transform.position = new Vector3(target.position.x, target.position.y, -10);
+        if (!gm.getIsDead())
+        {
+            transform.position = new Vector3(target.position.x, target.position.y, -10);
+        }
     }
 }

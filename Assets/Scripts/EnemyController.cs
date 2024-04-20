@@ -4,13 +4,18 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
+    [SerializeField] GameManager gm;
     [SerializeField] PlayerController player;
     [SerializeField] Transform shotPoint;
+    [SerializeField] SpriteRenderer spriteRenderer;
+    [SerializeField] LayerMask playerMask;
+    [SerializeField] AudioSource audioPlayer;
+    [SerializeField] AudioClip gunShotSFX;
+    
     [SerializeField] GameObject bulletPrefab;
     [SerializeField] FieldOfView fovPrefab;
     FieldOfView fieldOfView;
-    [SerializeField] SpriteRenderer spriteRenderer;
-    [SerializeField] LayerMask playerMask;
+    [SerializeField] AudioSource deadSFXprefab;
 
     public enum State
     {
@@ -46,14 +51,22 @@ public class EnemyController : MonoBehaviour
     [SerializeField] float FOV;
     [SerializeField] float viewDistance;
 
+    private void Awake()
+    {
+        gm = (GameManager)FindObjectOfType(typeof(GameManager));
+        player = (PlayerController)FindObjectOfType(typeof(PlayerController));
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        transform.position = points[0].position;
         current = 0;
-        transform.right = points[current + 1].position - points[current].position;
+        transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, Mathf.Atan2(points[1].position.y - points[0].position.y, points[1].position.x - points[0].position.x) * Mathf.Rad2Deg));
 
         fieldOfView = Instantiate(fovPrefab);
 
+        distanceFromPlayer = 10f;
         guntimer = 0;
         state = State.Idle;
         fieldOfView.SetViewDistance(viewDistance);
@@ -66,13 +79,27 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (gm.getIfPaused())
+        {
+            return;
+        }
+        if (gm.getIsDead())
+        {
+            state = State.Idle;
+        }
+        else
+        {
+            detectCheck();
+        }
         fieldOfView.SetFOV(FOV);
         fieldOfView.SetOrigin(transform.position);
         fieldOfView.SetAimDirection(transform.right);
-        detectCheck();
         guntimer += Time.deltaTime;
-        playerShot = player.getShooting();
         
+        if (state != State.Alert || state != State.CoolingDown)
+        {
+            FOV = originalFOV;
+        }
 
         switch (state)
         {
@@ -123,18 +150,18 @@ public class EnemyController : MonoBehaviour
                 aimAtPlayer();
                 if (player.getCrouched())
                 {
-                    alertTimer += Time.deltaTime;
+                    alertTimer += Time.deltaTime * 1.5f;
                     if (wasAggroed)
                     {
-                        alertTimer += Time.deltaTime;
+                        alertTimer += Time.deltaTime * 1.5f;
                     }
                 }
                 else if (!player.getCrouched())
                 {
-                    alertTimer += Time.deltaTime * 2;
+                    alertTimer += Time.deltaTime * 3;
                     if (wasAggroed)
                     {
-                        alertTimer += Time.deltaTime * 2;
+                        alertTimer += Time.deltaTime * 3;
                     }
                 }
                 break;
@@ -178,7 +205,6 @@ public class EnemyController : MonoBehaviour
         /*float angle = Mathf.Atan2(player.position.y - transform.position.y, player.position.x - transform.position.x) * Mathf.Rad2Deg;
         var targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
         transform.rotation = targetRotation;*/
-        distanceFromPlayer = Vector3.Distance(player.transform.position, transform.position);
     }
 
     public bool getAggro()
@@ -200,7 +226,8 @@ public class EnemyController : MonoBehaviour
 
     private void detectCheck()
     {
-        FOV = originalFOV;
+        distanceFromPlayer = Vector3.Distance(player.transform.position, transform.position);
+        playerShot = player.getShooting();
         if (playerShot && distanceFromPlayer < 7f)
         {
             alertTimer = alertWhen + 3f;
@@ -212,7 +239,7 @@ public class EnemyController : MonoBehaviour
             if(Vector3.Angle(transform.right, dirToPlayer) < FOV / 2f)
             {
                 RaycastHit2D _hit = Physics2D.Raycast(new Vector3(transform.position.x, transform.position.y, 0), dirToPlayer, viewDistance, playerMask);
-                //Debug.DrawRay(new Vector3(transform.position.x, transform.position.y, 0), dirToPlayer);
+                Debug.DrawRay(new Vector3(transform.position.x, transform.position.y, 0), dirToPlayer);
                 //Debug.Log(_hit.transform.gameObject.name);
                 if(_hit.transform.gameObject.name == "Player")
                 {
@@ -240,6 +267,11 @@ public class EnemyController : MonoBehaviour
                         state = State.Idle;
                     }
                 }
+            }
+            else if (!player.getCrouched() && distanceFromPlayer < 3f)
+            {
+                aimAtPlayer();
+                alertTimer = alertWhen / 1.5f;
             }
         }
         else
@@ -279,12 +311,15 @@ public class EnemyController : MonoBehaviour
         GameObject bullet = Instantiate(bulletPrefab, shotPoint.position, shotPoint.rotation);
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
         rb.AddForce(shotPoint.right * bulletSpeed, ForceMode2D.Impulse);
+        audioPlayer.clip = gunShotSFX;
+        audioPlayer.Play();
     }
 
     public void killed()
     {
-        Destroy(gameObject);
+        Instantiate(deadSFXprefab);
         Destroy(fieldOfView.gameObject);
+        Destroy(gameObject);
     }
 
     public float getAlertTimer()
